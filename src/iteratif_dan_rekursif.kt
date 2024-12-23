@@ -1,7 +1,7 @@
 import kotlin.system.measureNanoTime
 
 fun main() {
-    // Daftar hotel
+    // Daftar hotel asli
     val hotels = listOf(
         Hotel("Cherry Pink Hotel Medan Mitra RedDoorz", 7.5, 1),
         Hotel("Melissa Palace Hotel and Karaoke", 7.8, 1),
@@ -38,34 +38,46 @@ fun main() {
         Hotel("Hotel Tentrem Yogyakarta", 9.6, 5)
     )
 
-    // Input pengguna
+    // Input jumlah n, bintang, dan rating minimum
+    println("Masukkan jumlah hotel yang akan diproses (1-${hotels.size}):")
+    val n = readLine()?.toIntOrNull()?.coerceAtMost(hotels.size) ?: hotels.size
+
     println("Masukkan bintang hotel yang ingin dicari (1-5):")
     val bintang = readLine()?.toIntOrNull() ?: 0
+
     println("Masukkan rating minimum yang ingin dicari:")
     val minRating = readLine()?.toDoubleOrNull() ?: 0.0
 
-    // Hitung waktu eksekusi dengan presisi
-    val elapsedTime = measureNanoTime {
-        val result = filterHotelsRecursively(hotels, bintang, minRating)
+    val limitedHotels = hotels.take(n)
 
-        // Output hasil
-        if (result.isNotEmpty()) {
-            println("Hotel ditemukan untuk Bintang $bintang dengan rating minimal $minRating:")
-            result.forEach { println("- ${it.name} (${it.rating})") }
-        } else {
-            println("Tidak ada hotel yang ditemukan untuk Bintang $bintang dengan rating minimal $minRating.")
+    println("Daftar hotel yang diproses:")
+    limitedHotels.forEach { println("- ${it.name} (Bintang: ${it.bintang}, Rating: ${it.rating})") }
+
+    println("\nAnalisis efisiensi algoritma iteratif dan rekursif:")
+
+    // Hitung waktu iteratif
+    val iteratifTime = measureNanoTime {
+        val resultIteratif = mutableListOf<Hotel>()
+        for (hotel in limitedHotels) {
+            if (hotel.bintang == bintang && hotel.rating >= minRating) {
+                resultIteratif.add(hotel)
+            }
         }
     }
+    val iteratifTimeMs = iteratifTime / 1_000_000.0
 
-    // Konversi ke milidetik dengan presisi tiga angka desimal
-    val elapsedMillis = elapsedTime / 1_000_000.0
-    println("Waktu eksekusi rekursif: %.3f ms".format(elapsedMillis))
+    // Hitung waktu rekursif
+    val rekursifTime = measureNanoTime {
+        filterHotelsRecursively(limitedHotels, bintang, minRating)
+    }
+    val rekursifTimeMs = rekursifTime / 1_000_000.0
+
+    // Cetak hasil
+    println("\nJumlah hotel diproses: $n")
+    println("  Waktu Iteratif: %.3f ms".format(iteratifTimeMs))
+    println("  Waktu Rekursif: %.3f ms".format(rekursifTimeMs))
 }
 
-// Fungsi rekursif untuk filter hotel
-fun filterHotelsRecursively(hotels: List<Hotel>, bintang: Int, minRating: Double): List<Hotel> {
-    if (hotels.isEmpty()) return emptyList()
-    val current = hotels.first()
-    val remaining = filterHotelsRecursively(hotels.drop(1), bintang, minRating)
-    return if (current.bintang == bintang && current.rating >= minRating) listOf(current) + remaining else remaining
-}
+
+
+

@@ -1,3 +1,5 @@
+import kotlin.system.measureNanoTime
+
 data class Hotel(val name: String, val rating: Double, val bintang: Int)
 
 fun main() {
@@ -44,19 +46,24 @@ fun main() {
     println("Masukkan rating minimum yang ingin dicari:")
     val minRating = readLine()?.toDoubleOrNull() ?: 0.0
 
-    // Filter hotel secara iteratif
-    val result = mutableListOf<Hotel>()
-    for (hotel in hotels) {
-        if (hotel.bintang == bintang && hotel.rating >= minRating) {
-            result.add(hotel)
+    // Hitung waktu eksekusi filter
+    val elapsedTime = measureNanoTime {
+        val result = mutableListOf<Hotel>()
+        for (hotel in hotels) {
+            if (hotel.bintang == bintang && hotel.rating >= minRating) {
+                result.add(hotel)
+            }
+        }
+
+        // Output hasil
+        if (result.isNotEmpty()) {
+            println("Hotel ditemukan untuk Bintang $bintang dengan rating minimal $minRating:")
+            result.forEach { println("- ${it.name} (${it.rating})") }
+        } else {
+            println("Tidak ada hotel yang ditemukan untuk Bintang $bintang dengan rating minimal $minRating.")
         }
     }
 
-    // Output hasil
-    if (result.isNotEmpty()) {
-        println("Hotel ditemukan untuk Bintang $bintang dengan rating minimal $minRating:")
-        result.forEach { println("- ${it.name} (${it.rating})") }
-    } else {
-        println("Tidak ada hotel yang ditemukan untuk Bintang $bintang dengan rating minimal $minRating.")
-    }
+    val elapsedMillis = elapsedTime / 1_000_000.0
+    println("Waktu eksekusi iteratif: %.3f ms".format(elapsedMillis))
 }
